@@ -5,10 +5,12 @@ import com.Smart.Interview.Prep.Platform.dto.Profile.UserProfileUpdateDTO;
 import com.Smart.Interview.Prep.Platform.service.AuthService;
 import com.Smart.Interview.Prep.Platform.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("api/user")
 @RequiredArgsConstructor
@@ -18,7 +20,9 @@ public class UserProfileController {
 
     @GetMapping("/profile")
     public ResponseEntity<UserProfileResponseDTO> getProfile() {
+        log.info("User Profile");
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("Current User",email);
         return ResponseEntity.ok(userProfileService.getProfile(email));
     }
 

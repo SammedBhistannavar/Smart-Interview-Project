@@ -28,7 +28,7 @@ public class UserProfileService {
         user.setPhone(dto.getPhone());
         user.setBio(dto.getBio());
         user.setSkills(dto.getSkills());
-
+        user.setResumeUrl(dto.getResumeUrl());
         userRepository.save(user);
 
         return mapToDTO(user);

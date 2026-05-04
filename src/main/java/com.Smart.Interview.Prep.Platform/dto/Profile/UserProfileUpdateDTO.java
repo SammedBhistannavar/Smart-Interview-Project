@@ -8,4 +8,5 @@ public class UserProfileUpdateDTO {
     private String phone;
     private String bio;
     private String skills;
+    private String resumeUrl;
 }
