@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import com.Smart.Interview.Prep.Platform.service.UserProfileService;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 

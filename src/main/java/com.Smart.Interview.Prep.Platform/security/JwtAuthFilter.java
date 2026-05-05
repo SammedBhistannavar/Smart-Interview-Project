@@ -1,5 +1,6 @@
 package com.Smart.Interview.Prep.Platform.security;
 
+import com.Smart.Interview.Prep.Platform.entity.Enums.Role;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @Slf4j
 @Component
+
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     //    @Autowired
@@ -40,6 +42,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
 
             String token = header.substring(7);
+
             log.info("Token {}",token);
 
 
@@ -47,6 +50,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 // 🔥 Extract email from token
                 String email = jwtUtil.extractEmail(token);
+                String role = jwtUtil.extractRole(token);
                 log.info("Token Filter email {}",email);
 
                 // 🔥 Create Authentication object
@@ -54,9 +58,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(
                                 email,
                                 null,
-                                List.of(new SimpleGrantedAuthority("ROLE_USER")) // 🔥 REQUIRED
+                                List.of(new SimpleGrantedAuthority("ROLE_" + role))
                         );
-
+                log.info("Token Filter auth {}",auth);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
         }

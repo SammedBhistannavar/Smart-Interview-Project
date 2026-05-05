@@ -26,8 +26,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        log.info("I am In security Config");
-
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -37,10 +35,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
 
                         // USER & ADMIN
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/user/**").hasAnyRole("USER","ADMIN")
 
                         // ADMIN only
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         // everything else
                         .anyRequest().authenticated()

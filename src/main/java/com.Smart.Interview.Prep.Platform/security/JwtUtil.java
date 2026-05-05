@@ -1,5 +1,7 @@
 package com.Smart.Interview.Prep.Platform.security;
 
+import com.Smart.Interview.Prep.Platform.entity.Enums.Role;
+import com.Smart.Interview.Prep.Platform.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
@@ -14,9 +16,10 @@ public class JwtUtil {
 
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-    public String generateToken(String email) {
+    public String generateToken(String email, Role role) {
         return Jwts.builder()
                 .setSubject(email)
+                .claim("role", role.name())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -32,6 +35,14 @@ public class JwtUtil {
                 .getSubject();
     }
 
+    public String extractRole(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
+    }
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
