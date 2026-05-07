@@ -7,7 +7,7 @@ import lombok.Data;
 @Builder
 public class QuestionResponseDTO {
     private Long id;
-    private String tittle;
+    private String questions;
     private String description;
     private String topic;
     private String difficulty;

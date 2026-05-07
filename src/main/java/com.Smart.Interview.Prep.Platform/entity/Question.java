@@ -17,12 +17,16 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String tittle;
+    private String questions;
 
     @Column(length = 2000)
     private String description;
-
+    private String Answer;
     private String topic;
     private String difficulty;
     private String createdBy;
+    private String optionA;
+    private String optionB;
+    private String optionC;
+    private String optionD;
 }

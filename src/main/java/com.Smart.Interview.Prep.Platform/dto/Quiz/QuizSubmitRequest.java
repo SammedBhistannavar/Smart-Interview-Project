@@ -1,18 +1,16 @@
 package com.Smart.Interview.Prep.Platform.dto.Quiz;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class QuizResultDTO {
-    private int score;
-    private int totalQuestions;
-    private List<ResultDetailDTO> details;
+@AllArgsConstructor
+public class QuizSubmitRequest {
+        private Long quizSessionId;
+        private List<AnswerDTO> answers;
+
 }

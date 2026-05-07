@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class QuestionRequestDTO {
-    private String tittle;
+    private String question;
     private String description;
     private String topic;
     private String difficulty;

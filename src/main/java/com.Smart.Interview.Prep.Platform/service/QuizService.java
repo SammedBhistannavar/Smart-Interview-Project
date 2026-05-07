@@ -1,33 +1,38 @@
 package com.Smart.Interview.Prep.Platform.service;
 
-import com.Smart.Interview.Prep.Platform.dto.Quiz.QuizQuestionDTO;
-import com.Smart.Interview.Prep.Platform.dto.Quiz.QuizResultDTO;
-import com.Smart.Interview.Prep.Platform.dto.Quiz.SubmitRequest;
+import com.Smart.Interview.Prep.Platform.dto.Quiz.*;
 import com.Smart.Interview.Prep.Platform.entity.Question;
 import com.Smart.Interview.Prep.Platform.entity.QuizAnswer;
 import com.Smart.Interview.Prep.Platform.entity.QuizSession;
 import com.Smart.Interview.Prep.Platform.repository.QuestionRepository;
+import com.Smart.Interview.Prep.Platform.repository.QuizAnswerRepository;
 import com.Smart.Interview.Prep.Platform.repository.QuizSessionRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
+@Service
 @AllArgsConstructor
 public class QuizService {
 
     private final QuestionRepository questionRepository;
-    private final QuizSessionRepository quizSessionRepository
+    private final QuizSessionRepository quizSessionRepository;
+    private final QuizAnswerRepository quizAnswerRepository;
 
-    public List<QuizQuestionDTO> startQuiz(String topic, String difficulty, String email) {
+    public List<QuizQuestionDTO> startQuiz(QuizStartRequest request,String email) {
 
-        List<Question> questions = questionRepository.findRandomQuestions(topic, difficulty);
+        List<Question> questions = questionRepository.findRandomQuestions(request.getTopic(), request.getDifficulty());
+        log.info("Questions {}",questions);
 
         QuizSession session = new QuizSession();
         session.setUserEmail(email);
-        session.setTopic(topic);
-        session.setDifficulty(difficulty);
+        session.setTopic(request.getTopic());
+        session.setDifficulty(request.getDifficulty());
         session.setStartedAt(LocalDateTime.now());
 
         quizSessionRepository.save(session);
@@ -37,7 +42,7 @@ public class QuizService {
                 .toList();
     }
 
-    public QuizResultDTO submitQuiz(SubmitRequest.QuizSubmitRequest request) {
+    public QuizResultDTO submitQuiz(QuizSubmitRequest request) {
 
         QuizSession session = quizSessionRepository
                 .findById(request.getQuizSessionId())
@@ -47,25 +52,31 @@ public class QuizService {
 
         List<ResultDetailDTO> details = new ArrayList<>();
 
-        for (SubmitRequest.AnswerDTO ans : request.getAnswers()) {
+        for (AnswerDTO ans : request.getAnswers()) {
 
             Question q = questionRepository.findById(ans.getQuestionId())
                     .orElseThrow();
 
-            boolean isCorrect = q.getCorrectAnswer().equals(ans.getSelectedAnswer());
+            boolean isCorrect = q.getAnswer().equals(ans.getSelectedAnswer());
 
             if (isCorrect) score++;
 
             QuizAnswer qa = new QuizAnswer();
             qa.setQuestionId(q.getId());
             qa.setSelectedAnswer(ans.getSelectedAnswer());
-            qa.setCorrectAnswer(q.getCorrectAnswer());
+            qa.setCorrectAnswer(q.getAnswer());
             qa.setCorrect(isCorrect);
             qa.setQuizSession(session);
 
             quizAnswerRepository.save(qa);
 
-            details.add(new ResultDetailDTO(q.getQuestion(), isCorrect));
+            details.add(new ResultDetailDTO(
+                    q.getId(),
+                    q.getQuestions(),
+                    ans.getSelectedAnswer(),
+                    q.getAnswer(),
+                    isCorrect
+            ));
         }
 
         session.setScore(score);
@@ -80,9 +91,49 @@ public class QuizService {
         QuizSession session = quizSessionRepository.findById(sessionId)
                 .orElseThrow();
 
-        List<QuizAnswer> answers =
-                quizAnswerRepository.findByQuizSession(session);
+        List<QuizAnswer> answers = quizAnswerRepository.findByQuizSession(session);
 
         return mapToResultDTO(session, answers);
+    }
+
+
+private QuizQuestionDTO mapToDTO(Question q) {
+
+    List<String> options = new ArrayList<>();
+
+    if (q.getOptionA() != null) options.add(q.getOptionA());
+    if (q.getOptionB() != null) options.add(q.getOptionB());
+    if (q.getOptionC() != null) options.add(q.getOptionC());
+    if (q.getOptionD() != null) options.add(q.getOptionD());
+
+    return QuizQuestionDTO.builder()
+            .id(q.getId())
+            .question(q.getQuestions())
+            .options(options)
+            .build();
+}
+
+    private QuizResultDTO mapToResultDTO(
+            QuizSession session,
+            List<QuizAnswer> answers
+    ) {
+
+        List<ResultDetailDTO> details = answers.stream()
+                .map(answer -> {
+
+                    return ResultDetailDTO.builder()
+                            .questionId(answer.getId())
+                            .selectedAnswer(answer.getSelectedAnswer())
+                            .correctAnswer(answer.getCorrectAnswer())
+                            .isCorrect(answer.isCorrect())
+                            .build();
+                })
+                .toList();
+
+        return QuizResultDTO.builder()
+                .score(session.getScore())
+                .totalQuestions(answers.size())
+                .details(details)
+                .build();
     }
 }

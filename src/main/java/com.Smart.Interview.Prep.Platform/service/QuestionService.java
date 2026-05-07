@@ -19,7 +19,7 @@ public class QuestionService {
     public QuestionResponseDTO addQuestion(QuestionRequestDTO dto, String adminEmail) {
 
         Question question = Question.builder()
-                .tittle(dto.getTittle())
+                .questions(dto.getQuestion())
                 .description(dto.getDescription())
                 .topic(dto.getTopic())
                 .difficulty(dto.getDifficulty())
@@ -43,7 +43,7 @@ public class QuestionService {
     private QuestionResponseDTO mapToResponse(Question q) {
         return QuestionResponseDTO.builder()
                 .id(q.getId())
-                .tittle(q.getTittle())
+                .questions(q.getQuestions())
                 .description(q.getDescription())
                 .topic(q.getTopic())
                 .difficulty(q.getDifficulty())
